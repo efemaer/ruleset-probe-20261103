@@ -1,0 +1,35 @@
+name: bot
+on:
+  workflow_dispatch:
+    inputs:
+      action: { required: true, type: choice, options: [open-pr, approve, push] }
+      pr: { required: false, type: string }
+      path: { required: false, type: string }
+      branch: { required: false, type: string }
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ inputs.action }}
+          PR: ${{ inputs.pr }}
+          P: ${{ inputs.path }}
+          B: ${{ inputs.branch }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          case "$ACTION" in
+            open-pr)
+              git switch -c "$B"; echo "$B $(date +%s)" >> "$P"; git add "$P"; git commit -m "bot edit $P"; git push origin "$B"
+              gh pr create --head "$B" --base main --title "bot: $B" --body "opened by github-actions[bot]" ;;
+            push)
+              git fetch origin "$B"; git switch "$B"; echo "push $(date +%s)" >> "$P"; git add "$P"; git commit -m "bot push $P"; git push origin "$B" ;;
+            approve)
+              gh pr review "$PR" --approve --body "approved by github-actions[bot]" ;;
+          esac
