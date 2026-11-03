@@ -1,1 +1,6 @@
 /owned/ @efemaer
+/botowned/ @github-actions
+/botowned2/ @github-actions[bot]
+/appowned/ @apps/github-actions
+/nouser/ @this-user-does-not-exist-zz9
+/teamowned/ @pitorg/infra-admins
